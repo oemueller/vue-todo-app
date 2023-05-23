@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
+import { nanoid } from 'nanoid';
 import { fetchTodoItems } from '@/api/fetchTodoItems';
 import type { ToDoItem } from '@/types/ToDoItem';
-import { nanoid } from 'nanoid';
 
 export const useTodoStore = defineStore('todo', () => {
   const toDos = ref<ToDoItem[]>([]);
@@ -18,7 +18,7 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
-  function getToDoItem(id: ToDoItem['id']) {
+  function getToDoItem(id: ToDoItem['id']): ToDoItem | undefined {
     return toDos.value.find((todo) => todo.id === id);
   }
 
@@ -32,7 +32,7 @@ export const useTodoStore = defineStore('todo', () => {
     if (toDo) toDo.completed = false;
   }
 
-  function createTodoItem(title: string) {
+  function createTodoItem(title: string): ToDoItem {
     const newToDo: ToDoItem = {
       completed: false,
       id: nanoid(),
@@ -41,16 +41,17 @@ export const useTodoStore = defineStore('todo', () => {
       createdAt: new Date().toISOString()
     };
     toDos.value = [...toDos.value, newToDo];
+    return newToDo;
   }
 
   function sortByIsoDate(a: ToDoItem, b: ToDoItem) {
     return a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0;
   }
 
-  const incompleteToDos = computed(() =>
+  const incompleteToDos = computed<ToDoItem[]>(() =>
     toDos.value.sort(sortByIsoDate).filter((todo) => !todo.completed)
   );
-  const completedToDos = computed(() =>
+  const completedToDos = computed<ToDoItem[]>(() =>
     toDos.value.sort(sortByIsoDate).filter((todo) => todo.completed)
   );
 
